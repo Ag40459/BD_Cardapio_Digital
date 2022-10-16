@@ -1,0 +1,19 @@
+CLIENT_DB =
+    HOST_DB =
+    DATABASE_DB =
+    USER_DB =
+    PORT_DB =
+    PASSWORD_DB =
+
+    EMAIL_HOST =
+    EMAIL_PORT =
+    EMAIL_USER =
+    EMAIL_PASS =
+    EMAIL_NAME =
+    EMAIL_FROM =
+
+    KEY_ID =
+    KEY_NAME =
+    APP_KEY =
+    ENDPOINT_S3 =
+    BACKBLAZE_BUCKET =

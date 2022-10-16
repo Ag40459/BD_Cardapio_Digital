@@ -11,6 +11,7 @@ const { listAvatar, deleteAvatar, sendAvatar } = require('../controller/uploadFi
 route.get('/', welcome);
 route.post('/user', registerUser);
 route.post('/login', login);
+route.get('/category', listCategory);
 route.use(authenticateLogin);
 route.get('/user', listUsers);
 route.put('/user', updateUser);
@@ -21,7 +22,6 @@ route.delete('/user/avatar', deleteAvatar);
 route.delete('/user/:id', deleteUser);
 route.post('/category', registerCategory);
 route.put('/category', updateCategory);
-route.get('/category', listCategory);
 route.delete('/category/:id', deleteCategory);
 route.post('/product', multer.single('imagem'), registerProduct);
 
