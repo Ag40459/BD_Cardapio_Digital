@@ -12,7 +12,10 @@ route.get('/', welcome);
 route.post('/user', registerUser);
 route.post('/login', login);
 route.get('/category', listCategory);
+route.get('/product', listProduct);
+
 route.use(authenticateLogin);
+
 route.get('/user', listUsers);
 route.put('/user', updateUser);
 route.post('/user/avatar', multer.single('image'), sendAvatar);
@@ -25,7 +28,6 @@ route.put('/category', updateCategory);
 route.delete('/category/:id', deleteCategory);
 route.post('/product', multer.single('imagem'), registerProduct);
 
-route.get('/product', listProduct);
 route.put('/product', updateProduct);
 route.delete('/product/:id', deleteProduct);
 
