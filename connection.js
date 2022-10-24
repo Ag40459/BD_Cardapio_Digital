@@ -12,22 +12,5 @@ const knex = require('knex')({
 })
 
 
-// const knex = require('knex')({
-//     client: 'pg',
-//     connection: {
-//         host: "app-3037057d-5656-4249-84d4-22c1036e86db-do-user-12495400-0.b.db.ondigitalocean.com",
-//         port: 25060,
-//         username: "db-app-ninacai",
-//         password: "AVNS_XoebvVgD9V55KlrnYr5",
-//         database: "db-app-ninacai",
-//         ssl: { rejectUnauthorized: false }
-//     },
-// })
-
-
-
-
-
-
 module.exports = knex;
 
