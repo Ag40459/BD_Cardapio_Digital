@@ -1,1 +1,1 @@
-module.exports = 'minhaSenha';
+module.exports = 'nomeDaEquipe';

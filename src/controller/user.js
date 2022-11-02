@@ -1,27 +1,26 @@
-const transport = require('../utils/email');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const knex = require("../../connection");
 const jwt = require('jsonwebtoken');
 const passwordJwt = require('../utils/passwordJwt');
-const compilerHtml = require('../utils/compilerHtml');
+
 
 const registerUser = async (req, res) => {
-    const { nome, email, senha, tipo } = req.body
+    const { name, email, password } = req.body
 
-    if (!nome || !email || !senha || !tipo) {
-        return res.status(400).json({ message: "Nome, E-mail, Senha e Tipo são obrigatórios" });
+    if (!name || !email || !password) {
+        return res.status(400).json({ message: "name, E-mail e Senha são obrigatórios" });
     }
     try {
-        const checkEmail = await knex('usuarios').where({ email: email }).first();
+        const checkEmail = await knex('user').where({ email: email }).first();
         if (checkEmail) {
             return res.status(400).json({ message: 'Já existe usuário cadastrado com o e-mail informado.' });
         }
-        const newPassword = await bcrypt.hash(senha, 10);
+        const newPassword = await bcrypt.hash(password, 10);
 
-        const user = await knex('usuarios').insert({ nome, email, senha: newPassword, tipo }).returning('*');
+        const user = await knex('user').insert({ name, email, password: newPassword }).returning('*');
 
-        const { senha: __, ...mirrorUser } = user[0];
+        const { password: __, ...mirrorUser } = user[0];
 
         return res.status(201).json(mirrorUser);
 
@@ -31,45 +30,35 @@ const registerUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { email, senha } = req.body;
-    // const arquivo = await fs.readFile('./src/templates/login.html');
+    const { email, password } = req.body;
 
-    if (!email || !senha) {
+    if (!email || !password) {
         return res.status(400).json({ message: "E-mail e Senha são obrigatórios" })
     }
     try {
-        const user = await knex('usuarios').where({ email: email }).first();
+        const user = await knex('user').where({ email: email }).first();
 
         if (!user) {
             return res.status(404).json({ message: 'E-mail ou Senha estão Incorreto' });
         }
 
-        const validatePassword = await bcrypt.compare(senha, user.senha);
+        const validatePassword = await bcrypt.compare(password, user.password);
         if (!validatePassword) {
             return res.status(404).json({ message: 'E-mail ou Senha estão Incorreto' });
         }
-        const token = jwt.sign({ id: user.id, nome: user.nome }, passwordJwt, { expiresIn: '8h' });
-        const { id, nome } = user;
-        const html = await compilerHtml('./src/templates/login.html');
+        const token = jwt.sign({ id: user.id, name: user.name }, passwordJwt, { expiresIn: '12h' });
+        const { id, name } = user;
 
-        transport.sendMail({
-            from: `${process.env.EMAIL_NAME} <${process.env.EMAIL_FROM}>`,
-            to: `${nome} <${'email'} >`,
-            subject: 'Acesso a conta',
-            html,
-        })
-
-        return res.status(200).json({ usuario: { id, nome, email }, token })
+        return res.status(200).json({ usuario: { id, name, email }, token })
 
     } catch (error) {
-        console.log(error);
         return res.status(404).json(error.menssage);
     }
 }
 
 const listUsers = async (req, res) => {
     try {
-        const users = await knex('usuarios').first();
+        const users = await knex('user').first();
         const { senha: __, ...formattedUser } = users;
 
         return res.json(formattedUser)
@@ -79,21 +68,21 @@ const listUsers = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-    const { nome, email, senha, tipo } = req.body
+    const { name, email, password, tipo } = req.body
 
-    if (!nome || !email || !senha || !tipo) {
+    if (!name || !email || !password || !tipo) {
         return res.status(400).json({ message: "Nome, E-mail, Senha e Tipo são obrigatórios" });
     }
     try {
-        const checkEmail = await knex('usuarios').where({ email: email }).first();
+        const checkEmail = await knex('user').where({ email: email }).first();
         if (checkEmail) {
             return res.status(400).json({ message: 'Já existe usuário cadastrado com o e-mail informado.' });
         }
-        const newPassword = await bcrypt.hash(senha, 10);
-        const updatedUser = await knex('usuarios').where({ id: req.usuario.id }).update({
-            nome,
+        const newPassword = await bcrypt.hash(password, 10);
+        const updatedUser = await knex('user').where({ id: req.user.id }).update({
+            name,
             email,
-            senha: newPassword,
+            password: newPassword,
             tipo
         }).returning('*');
         if (!updatedUser[0]) {
@@ -106,20 +95,16 @@ const updateUser = async (req, res) => {
     }
 }
 
-const welcome = async (req, res) => {
-    return res.status(200).json('SEJA BEM VINDO, ACESSE NOSSO SITE PELO LINK www.ninacai.com.br');
-}
-
 const deleteUser = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await knex('usuarios').where({ id }).first();
+        const user = await knex('user').where({ id }).first();
 
         if (!user) {
             return res.status(404).json({ message: 'Usuário não encontrado' });
         }
-        const deleteUser = await knex('usuarios').where({ id }).del()
+        const deleteUser = await knex('user').where({ id }).del()
 
         if (!deleteUser) {
             return res.status(400).json({ message: "Usuário não foi excluido" });
@@ -131,6 +116,11 @@ const deleteUser = async (req, res) => {
     }
 }
 
+const welcome = async (req, res) => {
+    return res.status(200).json('SEJA BEM VINDO, ESSA É A API DA EQUIPE "NOME EQUIPE". TURMA DE DESENVOLVIMENTO DE SOFTWARE 7 DA CUBOS ACADEMY');
+}
+
 module.exports = {
-    login, registerUser, listUsers, updateUser, welcome, deleteUser
+    registerUser, login, listUsers, updateUser, deleteUser,
+    welcome
 }
